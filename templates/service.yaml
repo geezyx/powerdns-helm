@@ -8,7 +8,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
     - port: 8081
       targetPort: 8081
@@ -22,6 +22,46 @@ spec:
       targetPort: 53
       protocol: TCP
       name: dns-tcp
+  selector:
+    app: {{ template "pdns.name" . }}
+    release: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "pdns.fullname" . }}-tcp
+  labels:
+    app: {{ template "pdns.name" . }}
+    chart: {{ template "pdns.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 53
+      targetPort: 53
+      protocol: TCP
+      name: dns-tcp
+  selector:
+    app: {{ template "pdns.name" . }}
+    release: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "pdns.fullname" . }}-udp
+  labels:
+    app: {{ template "pdns.name" . }}
+    chart: {{ template "pdns.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 53
+      targetPort: 53
+      protocol: UDP
+      name: dns-udp
   selector:
     app: {{ template "pdns.name" . }}
     release: {{ .Release.Name }}
